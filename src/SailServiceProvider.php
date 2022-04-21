@@ -1,11 +1,11 @@
 <?php
 
-namespace Laravel\Sail;
+namespace SternerStuff\WordPressSail;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Sail\Console\InstallCommand;
-use Laravel\Sail\Console\PublishCommand;
+use SternerStuff\WordPressSail\Console\InstallCommand;
+use SternerStuff\WordPressSail\Console\PublishCommand;
 
 class SailServiceProvider extends ServiceProvider implements DeferrableProvider
 {

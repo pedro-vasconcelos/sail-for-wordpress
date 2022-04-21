@@ -1,6 +1,6 @@
 <?php
 
-namespace Laravel\Sail\Console;
+namespace SternerStuff\WordPressSail\Console;
 
 use Illuminate\Console\Command;
 
@@ -18,7 +18,7 @@ class PublishCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Publish the Laravel Sail Docker files';
+    protected $description = 'Publish the WordPress Sail Docker files';
 
     /**
      * Execute the console command.
@@ -33,9 +33,9 @@ class PublishCommand extends Command
             $this->laravel->basePath('docker-compose.yml'),
             str_replace(
                 [
-                    './vendor/laravel/sail/runtimes/8.1',
-                    './vendor/laravel/sail/runtimes/8.0',
-                    './vendor/laravel/sail/runtimes/7.4',
+                    './vendor/sterner-stuff/wordpress-sail/runtimes/8.1',
+                    './vendor/sterner-stuff/wordpress-sail/runtimes/8.0',
+                    './vendor/sterner-stuff/wordpress-sail/runtimes/7.4',
                 ],
                 [
                     './docker/8.1',

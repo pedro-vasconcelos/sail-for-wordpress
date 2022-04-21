@@ -1,6 +1,6 @@
 <?php
 
-namespace Laravel\Sail\Console;
+namespace SternerStuff\WordPressSail\Console;
 
 use Illuminate\Console\Command;
 
@@ -20,7 +20,7 @@ class InstallCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Install Laravel Sail\'s default Docker Compose file';
+    protected $description = 'Install WordPress Sail\'s default Docker Compose file';
 
     /**
      * Execute the console command.
@@ -56,7 +56,6 @@ class InstallCommand extends Command
     {
         return $this->choice('Which services would you like to install?', [
              'mysql',
-             'pgsql',
              'mariadb',
              'redis',
              'memcached',
@@ -77,7 +76,7 @@ class InstallCommand extends Command
     {
         $depends = collect($services)
             ->filter(function ($service) {
-                return in_array($service, ['mysql', 'pgsql', 'mariadb', 'redis', 'meilisearch', 'minio', 'selenium']);
+                return in_array($service, ['mysql', 'mariadb', 'redis', 'meilisearch', 'minio', 'selenium']);
             })->map(function ($service) {
                 return "            - {$service}";
             })->whenNotEmpty(function ($collection) {
@@ -90,7 +89,7 @@ class InstallCommand extends Command
 
         $volumes = collect($services)
             ->filter(function ($service) {
-                return in_array($service, ['mysql', 'pgsql', 'mariadb', 'redis', 'meilisearch', 'minio']);
+                return in_array($service, ['mysql', 'mariadb', 'redis', 'meilisearch', 'minio']);
             })->map(function ($service) {
                 return "    sail-{$service}:\n        driver: local";
             })->whenNotEmpty(function ($collection) {
@@ -124,17 +123,13 @@ class InstallCommand extends Command
     {
         $environment = file_get_contents($this->laravel->basePath('.env'));
 
-        if (in_array('pgsql', $services)) {
-            $environment = str_replace('DB_CONNECTION=mysql', "DB_CONNECTION=pgsql", $environment);
-            $environment = str_replace('DB_HOST=127.0.0.1', "DB_HOST=pgsql", $environment);
-            $environment = str_replace('DB_PORT=3306', "DB_PORT=5432", $environment);
-        } elseif (in_array('mariadb', $services)) {
+        if (in_array('mariadb', $services)) {
             $environment = str_replace('DB_HOST=127.0.0.1', "DB_HOST=mariadb", $environment);
         } else {
             $environment = str_replace('DB_HOST=127.0.0.1', "DB_HOST=mysql", $environment);
         }
 
-        $environment = str_replace('DB_USERNAME=root', "DB_USERNAME=sail", $environment);
+        $environment = str_replace('DB_USER=root', "DB_USER=sail", $environment);
         $environment = preg_replace("/DB_PASSWORD=(.*)/", "DB_PASSWORD=password", $environment);
 
         $environment = str_replace('MEMCACHED_HOST=127.0.0.1', 'MEMCACHED_HOST=memcached', $environment);
