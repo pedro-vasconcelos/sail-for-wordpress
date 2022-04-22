@@ -14,14 +14,14 @@ class PublishCommand extends Command
      *     wp sail:publish
      *
      */
-    public function __invoke( $args, $assoc_args )
+    public function __invoke()
     {
         $from = __DIR__ . '/../runtimes';
-        $to = WP_CLI\Utils\get_home_dir() . '/.docker';
+        $to = getcwd() . '/.docker';
         `cp -r $from $to`;
 
         file_put_contents(
-            WP_CLI\Utils\get_home_dir() . '/docker-compose.yml',
+            getcwd() . '/docker-compose.yml',
             str_replace(
                 [
                     './vendor/sterner-stuff/wordpress-sail/runtimes/8.1',
@@ -33,7 +33,7 @@ class PublishCommand extends Command
                     './docker/8.0',
                     './docker/7.4',
                 ],
-                file_get_contents(WP_CLI\Utils\get_home_dir() . '/docker-compose.yml')
+                file_get_contents(getcwd() . '/docker-compose.yml')
             )
         );
     }

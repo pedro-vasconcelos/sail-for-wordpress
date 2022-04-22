@@ -8,7 +8,6 @@ use WP_CLI\Utils;
 
 class InstallCommand extends Command
 {
-    protected $project_root;
 
     /**
      * Install WordPress Sail's default Docker Compose file
@@ -29,8 +28,6 @@ class InstallCommand extends Command
      */
     public function __invoke( $args, $assoc_args )
     {
-
-        $this->project_root = ABSPATH . '../../';
 
         if (Utils\get_flag_value($assoc_args, 'with', false)) {
             $services = $assoc_args['with'] == 'none' ? [] : explode(',', $assoc_args['with']);
@@ -119,7 +116,7 @@ class InstallCommand extends Command
         // Remove empty lines...
         $dockerCompose = preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n", $dockerCompose);
 
-        file_put_contents($this->project_root . 'docker-compose.yml', $dockerCompose);
+        file_put_contents(getcwd() . '/docker-compose.yml', $dockerCompose);
     }
 
     /**
@@ -130,7 +127,7 @@ class InstallCommand extends Command
      */
     protected function replaceEnvVariables(array $services)
     {
-        $environment = file_get_contents($this->project_root . '.env');
+        $environment = file_get_contents(getcwd() . '/.env');
         
         if (in_array('mariadb', $services)) {
             $environment = str_replace(['DB_HOST=127.0.0.1', "# DB_HOST='localhost'", "DB_HOST='localhost'"], "DB_HOST=mariadb", $environment);
@@ -149,7 +146,7 @@ class InstallCommand extends Command
             $environment .= "\nMEILISEARCH_HOST=http://meilisearch:7700\n";
         }
 
-        file_put_contents($this->project_root . '.env', $environment);
+        file_put_contents(getcwd() . '/.env', $environment);
     }
 
     /**
