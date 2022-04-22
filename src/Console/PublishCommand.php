@@ -7,30 +7,21 @@ use Illuminate\Console\Command;
 class PublishCommand extends Command
 {
     /**
-     * The name and signature of the console command.
+     * Publish the WordPress Sail Docker files
      *
-     * @var string
-     */
-    protected $signature = 'sail:publish';
-
-    /**
-     * The console command description.
+     * ## EXAMPLES
      *
-     * @var string
-     */
-    protected $description = 'Publish the WordPress Sail Docker files';
-
-    /**
-     * Execute the console command.
+     *     wp sail:publish
      *
-     * @return void
      */
-    public function handle()
+    public function __invoke( $args, $assoc_args )
     {
-        $this->call('vendor:publish', ['--tag' => 'sail-docker']);
+        $from = __DIR__ . '/../runtimes';
+        $to = WP_CLI\Utils\get_home_dir() . '/.docker';
+        `cp -r $from $to`;
 
         file_put_contents(
-            $this->laravel->basePath('docker-compose.yml'),
+            WP_CLI\Utils\get_home_dir() . '/docker-compose.yml',
             str_replace(
                 [
                     './vendor/sterner-stuff/wordpress-sail/runtimes/8.1',
@@ -42,7 +33,7 @@ class PublishCommand extends Command
                     './docker/8.0',
                     './docker/7.4',
                 ],
-                file_get_contents($this->laravel->basePath('docker-compose.yml'))
+                file_get_contents(WP_CLI\Utils\get_home_dir() . '/docker-compose.yml')
             )
         );
     }

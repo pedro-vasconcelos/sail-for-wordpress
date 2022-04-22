@@ -3,48 +3,51 @@
 namespace SternerStuff\WordPressSail\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
+use WP_CLI\Utils;
 
 class InstallCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'sail:install
-                {--with= : The services that should be included in the installation}
-                {--devcontainer : Create a .devcontainer configuration directory}';
+    protected $project_root;
 
     /**
-     * The console command description.
+     * Install WordPress Sail's default Docker Compose file
      *
-     * @var string
-     */
-    protected $description = 'Install WordPress Sail\'s default Docker Compose file';
-
-    /**
-     * Execute the console command.
+     * ## OPTIONS
      *
-     * @return void
+     * [--with=<with>]
+     * : The services that should be included in the installation.
+     *
+     * [--devcontainer]
+     * : Create a .devcontainer configuration directory. Currently unsupported.
+     *
+     * ## EXAMPLES
+     *
+     *     wp sail:install --with=mysql,redis
+     *
+     * @when before_wp_load
      */
-    public function handle()
+    public function __invoke( $args, $assoc_args )
     {
-        if ($this->option('with')) {
-            $services = $this->option('with') == 'none' ? [] : explode(',', $this->option('with'));
-        } elseif ($this->option('no-interaction')) {
-            $services = ['mysql', 'redis', 'selenium', 'mailhog'];
+
+        $this->project_root = ABSPATH . '../../';
+
+        if (Utils\get_flag_value($assoc_args, 'with', false)) {
+            $services = $assoc_args['with'] == 'none' ? [] : explode(',', $assoc_args['with']);
+        // } elseif ($this->option('no-interaction')) {
+        //     $services = ['mysql', 'redis', 'selenium', 'mailhog'];
         } else {
-            $services = $this->gatherServicesWithSymfonyMenu();
+            $services = ['mysql', 'mailhog'];
         }
 
         $this->buildDockerCompose($services);
         $this->replaceEnvVariables($services);
 
-        if ($this->option('devcontainer')) {
-            $this->installDevContainer();
-        }
+        // if ($this->option('devcontainer')) {
+        //     $this->installDevContainer();
+        // }
 
-        $this->info('Sail scaffolding installed successfully.');
+        \WP_CLI::success('Sail scaffolding installed successfully.');
     }
 
     /**
@@ -52,7 +55,7 @@ class InstallCommand extends Command
      *
      * @return array
      */
-    protected function gatherServicesWithSymfonyMenu()
+    /* protected function gatherServicesWithSymfonyMenu()
     {
         return $this->choice('Which services would you like to install?', [
              'mysql',
@@ -65,6 +68,7 @@ class InstallCommand extends Command
              'selenium',
          ], 0, null, true);
     }
+    */
 
     /**
      * Build the Docker Compose file.
@@ -74,21 +78,26 @@ class InstallCommand extends Command
      */
     protected function buildDockerCompose(array $services)
     {
-        $depends = collect($services)
-            ->filter(function ($service) {
+        $depends = new Collection($services);
+
+        $depends = $depends->filter(function ($service) {
                 return in_array($service, ['mysql', 'mariadb', 'redis', 'meilisearch', 'minio', 'selenium']);
             })->map(function ($service) {
                 return "            - {$service}";
             })->whenNotEmpty(function ($collection) {
                 return $collection->prepend('depends_on:');
             })->implode("\n");
+        
+        
+        $stubs = new Collection($services);
 
-        $stubs = rtrim(collect($services)->map(function ($service) {
+        $stubs = rtrim($stubs->map(function ($service) {
             return file_get_contents(__DIR__ . "/../../stubs/{$service}.stub");
         })->implode(''));
 
-        $volumes = collect($services)
-            ->filter(function ($service) {
+        $volumes = new Collection($services);
+
+        $volumes = $volumes->filter(function ($service) {
                 return in_array($service, ['mysql', 'mariadb', 'redis', 'meilisearch', 'minio']);
             })->map(function ($service) {
                 return "    sail-{$service}:\n        driver: local";
@@ -110,7 +119,7 @@ class InstallCommand extends Command
         // Remove empty lines...
         $dockerCompose = preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n", $dockerCompose);
 
-        file_put_contents($this->laravel->basePath('docker-compose.yml'), $dockerCompose);
+        file_put_contents($this->project_root . 'docker-compose.yml', $dockerCompose);
     }
 
     /**
@@ -121,15 +130,15 @@ class InstallCommand extends Command
      */
     protected function replaceEnvVariables(array $services)
     {
-        $environment = file_get_contents($this->laravel->basePath('.env'));
-
+        $environment = file_get_contents($this->project_root . '.env');
+        
         if (in_array('mariadb', $services)) {
-            $environment = str_replace('DB_HOST=127.0.0.1', "DB_HOST=mariadb", $environment);
+            $environment = str_replace(['DB_HOST=127.0.0.1', "# DB_HOST='localhost'", "DB_HOST='localhost'"], "DB_HOST=mariadb", $environment);
         } else {
-            $environment = str_replace('DB_HOST=127.0.0.1', "DB_HOST=mysql", $environment);
+            $environment = str_replace(['DB_HOST=127.0.0.1', "# DB_HOST='localhost'", "DB_HOST='localhost'"], "DB_HOST=mysql", $environment);
         }
 
-        $environment = str_replace('DB_USER=root', "DB_USER=sail", $environment);
+        $environment = str_replace("DB_USER='database_user'", "DB_USER=sail", $environment);
         $environment = preg_replace("/DB_PASSWORD=(.*)/", "DB_PASSWORD=password", $environment);
 
         $environment = str_replace('MEMCACHED_HOST=127.0.0.1', 'MEMCACHED_HOST=memcached', $environment);
@@ -140,7 +149,7 @@ class InstallCommand extends Command
             $environment .= "\nMEILISEARCH_HOST=http://meilisearch:7700\n";
         }
 
-        file_put_contents($this->laravel->basePath('.env'), $environment);
+        file_put_contents($this->project_root . '.env', $environment);
     }
 
     /**
@@ -148,6 +157,7 @@ class InstallCommand extends Command
      *
      * @return void
      */
+    /*
     protected function installDevContainer()
     {
         if (! is_dir($this->laravel->basePath('.devcontainer'))) {
@@ -165,5 +175,5 @@ class InstallCommand extends Command
         $environment .= "\nWWWUSER=1000\n";
 
         file_put_contents($this->laravel->basePath('.env'), $environment);
-    }
+    }*/
 }
