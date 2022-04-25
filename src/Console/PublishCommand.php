@@ -2,9 +2,7 @@
 
 namespace SternerStuff\WordPressSail\Console;
 
-use Illuminate\Console\Command;
-
-class PublishCommand extends Command
+class PublishCommand
 {
     /**
      * Publish the WordPress Sail Docker files

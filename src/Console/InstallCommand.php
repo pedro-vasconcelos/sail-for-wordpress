@@ -2,11 +2,10 @@
 
 namespace SternerStuff\WordPressSail\Console;
 
-use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use WP_CLI\Utils;
 
-class InstallCommand extends Command
+class InstallCommand
 {
 
     /**
