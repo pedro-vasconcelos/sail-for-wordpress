@@ -15,7 +15,7 @@ WordPress Sail is inspired by and derived from [Laravel Sail](https://github.com
 From a Bedrock project, require WordPress Sail:
 
 ```
-composer require wp-cli/wp-cli-bundle sterner-stuff/wordpress-sail`
+composer require wp-cli/wp-cli sterner-stuff/wordpress-sail`
 ```
 
 Note that we're requiring WP-CLI as a local dependency. Some of WP Sail's WP-CLI commands depend on loading before WordPress. If you use a globally-installed version of WP-CLI and try to run commands required at the local level, they won't load early enough and you'll get errors about database connections.
@@ -32,7 +32,25 @@ By default, MySQL and Mailhog containers will be attached, but you can also use,
 vendor/bin/wp sail:install --with=mysql,mailhog,redis
 ```
 
-And build your containers:
+At this point, you may want to change the version of PHP used in the `docker-compose.yml` file.
+
+```
+version: '3'
+services:
+    wordpress.test:
+        build:
+            context: ./vendor/sterner-stuff/wordpress-sail/runtimes/8.1 <-- Supports 7.4, 8.0, and 8.1
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: wordpress-sail-8.1/app <-- Update here as well.
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        # ...
+```
+
+Finally, build your containers:
+
 ```
 vendor/bin/sail build
 ```
@@ -48,11 +66,26 @@ vendor/bin/sail build --no-cache
 vendor/bin/sail wp info
 ```
 
-And finally, if you want to customize the Dockerfile used:
+If you want to customize the Dockerfile used:
 
 ```
 vendor/bin/wp sail:publish
 ```
+
+After customizing your Sail installation, change the image name for the application container in your application's docker-compose.yml file so it doesn't conflict with other projects using the default Dockerfile.
+
+## Starting on a project with Sail already installed
+
+```
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v $(pwd):/var/www/html \
+    -w /var/www/html \
+    laravelsail/php81-composer:latest \
+    composer install --ignore-platform-reqs
+```
+
+When using the laravelsail/phpXX-composer image, you should use the same version of PHP that you're using for your application (74, 80, or 81).
 
 ## Official Documentation
 
