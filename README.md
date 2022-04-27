@@ -55,24 +55,56 @@ Finally, build your containers:
 vendor/bin/sail build
 ```
 
-## Usage
+## Install without PHP/Composer on your host machine
 
-WordPress Sail tries to match Laravel Sail as closely as possible. So you might:
+If you're trying to use purely Docker to get going, that's an option. We'll assume you already started your Bedrock project. Then you can run these three commands:
 
 ```
-vendor/bin/sail up -d
-vendor/bin/sail down
-vendor/bin/sail build --no-cache
-vendor/bin/sail wp info
+// Require WP-CLI so the sail:install command will work w/o a database
+docker run -it --rm \
+	-u "$(id -u):$(id -g)" \
+	-v $(pwd):/var/www/html \
+	-w /var/www/html \
+	composer \
+	require --dev wp-cli/wp-cli 
+
+// Install your docker-compose.yml file
+docker run -it --rm \
+	-u "$(id -u):$(id -g)" \
+	-v $(pwd):/var/www/html \
+	-w /var/www/html \
+	php:8.0-cli \
+	vendor/bin/wp sail:install
+
+// Optionally, remove the WP-CLI dependency. You shouldn't need it in the future.
+docker run -it --rm \
+	-u "$(id -u):$(id -g)" \
+	-v $(pwd):/var/www/html \
+	-w /var/www/html \
+	composer \
+	remove --dev wp-cli/wp-cli
+```
+
+## Usage
+
+WordPress Sail tries to match Laravel Sail as closely as possible. So you might do some of the following (assuming you've aliased `sail` to `vendor/bin/sail`:
+
+```
+sail up -d
+sail down
+sail wp cli info
+sail tinker # alias for wp shell
 ```
 
 If you want to customize the Dockerfile used:
 
 ```
-vendor/bin/wp sail:publish
+sail up -d
+sail wp sail:publish
+sail down
 ```
 
-After customizing your Sail installation, change the image name for the application container in your application's docker-compose.yml file so it doesn't conflict with other projects using the default Dockerfile.
+After customizing your Sail installation, change the image name for the application container in your application's docker-compose.yml file so it doesn't conflict with other projects using the default Dockerfile. Then run `sail build --no-cache`
 
 ## Starting on a project with Sail already installed
 
