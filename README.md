@@ -15,7 +15,7 @@ WordPress Sail is inspired by and derived from [Laravel Sail](https://github.com
 From a Bedrock project, require WordPress Sail:
 
 ```
-composer require wp-cli/wp-cli sterner-stuff/wordpress-sail`
+composer require wp-cli/wp-cli sterner-stuff/wordpress-sail
 ```
 
 Note that we're requiring WP-CLI as a local dependency. Some of WP Sail's WP-CLI commands depend on loading before WordPress. If you use a globally-installed version of WP-CLI and try to run commands required at the local level, they won't load early enough and you'll get errors about database connections.
@@ -87,7 +87,9 @@ docker run -it --rm \
 
 ## Usage
 
-WordPress Sail tries to match Laravel Sail as closely as possible. So you might do some of the following (assuming you've aliased `sail` to `vendor/bin/sail`:
+WordPress Sail tries to match Laravel Sail as closely as possible. WP-CLI is also now available in your container, so you don't need to use the bundled one.
+
+You might do some of the following (assuming you've aliased `sail` to `vendor/bin/sail`):
 
 ```
 sail up -d
