@@ -78,9 +78,11 @@ docker run -it --rm \
 	-u "$(id -u):$(id -g)" \
 	-v $(pwd):/var/www/html \
 	-w /var/www/html \
-	wordpress:cli \
+	wordpress:cli-php8.1 \
 	sail:install
 ```
+
+When using the wordpress:cli-phpx.x image, you should use the same version of PHP that you're using for your application (7.4, 8.0, or 8.1).
 
 ## Usage
 
