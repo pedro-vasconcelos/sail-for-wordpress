@@ -15,21 +15,26 @@ WordPress Sail is inspired by and derived from [Laravel Sail](https://github.com
 From a Bedrock project, require WordPress Sail:
 
 ```
-composer require wp-cli/wp-cli sterner-stuff/wordpress-sail
+composer require sterner-stuff/wordpress-sail
 ```
 
-Note that we're requiring WP-CLI as a local dependency. Some of WP Sail's WP-CLI commands depend on loading before WordPress. If you use a globally-installed version of WP-CLI and try to run commands required at the local level, they won't load early enough and you'll get errors about database connections.
-
-With that in mind, use the bundled WP-CLI command to scaffold your `docker-composer.yml` file. Remember, we need to use our local version of WP-CLI:
+To ensure the local autoloader is run as part of the WP-CLI lifecycle, ensure it's included in your `wp-cli.yml` file:
 
 ```
-vendor/bin/wp sail:install [--with=]
+require:
+    - vendor/autoload.php
+```
+
+Scaffold your `docker-composer.yml` file:
+
+```
+wp sail:install [--with=]
 ```
 
 By default, MySQL and Mailhog containers will be attached, but you can also use, for example, Redis:
 
 ```
-vendor/bin/wp sail:install --with=mysql,mailhog,redis
+wp sail:install --with=mysql,mailhog,redis
 ```
 
 At this point, you may want to change the version of PHP used in the `docker-compose.yml` file.
@@ -57,32 +62,24 @@ vendor/bin/sail build
 
 ## Install without PHP/Composer on your host machine
 
-If you're trying to use purely Docker to get going, that's an option. We'll assume you already started your Bedrock project. Then you can run these three commands:
+If you're trying to use purely Docker to get going, that's an option. We'll assume you already started your Bedrock project and updated `wp-cli.yml`. Then you can run these two commands:
 
 ```
-// Require WP-CLI so the sail:install command will work w/o a database
+// Require Sail
 docker run -it --rm \
 	-u "$(id -u):$(id -g)" \
 	-v $(pwd):/var/www/html \
 	-w /var/www/html \
 	composer \
-	require --dev wp-cli/wp-cli 
+	require --dev sterner-stuff/wordpress-sail
 
-// Install your docker-compose.yml file
+// Scaffold your docker-compose.yml file
 docker run -it --rm \
 	-u "$(id -u):$(id -g)" \
 	-v $(pwd):/var/www/html \
 	-w /var/www/html \
-	php:8.0-cli \
-	vendor/bin/wp sail:install
-
-// Optionally, remove the WP-CLI dependency. You shouldn't need it in the future.
-docker run -it --rm \
-	-u "$(id -u):$(id -g)" \
-	-v $(pwd):/var/www/html \
-	-w /var/www/html \
-	composer \
-	remove --dev wp-cli/wp-cli
+	wordpress:cli \
+	sail:install
 ```
 
 ## Usage
