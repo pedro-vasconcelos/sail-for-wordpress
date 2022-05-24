@@ -38,7 +38,7 @@ class InstallCommand
 
         $this->buildDockerCompose($services);
         $this->replaceEnvVariables($services);
-        $this->configurePhpUnit();
+        // $this->configurePhpUnit();
 
         // if ($this->option('devcontainer')) {
         //     $this->installDevContainer();
