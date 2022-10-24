@@ -9,24 +9,6 @@ class InstallCommand
 {
 
     /**
-     * Install WordPress Sail's default Docker Compose file
-     *
-     * ## OPTIONS
-     *
-     * [--with=<with>]
-     * : The services that should be included in the installation.
-     *
-     * [--devcontainer]
-     * : Create a .devcontainer configuration directory. Currently unsupported.
-     *
-     * ## EXAMPLES
-     *
-     *     wp sail:install --with=mysql,redis
-     *
-     * @when before_wp_load
-     */
-
-    /**
      * The available services that may be installed.
      *
      * @var array<string>
@@ -44,9 +26,21 @@ class InstallCommand
     ];
 
     /**
-     * Execute the console command.
+     * Install WordPress Sail's default Docker Compose file
      *
-     * @return int|null
+     * ## OPTIONS
+     *
+     * [--with=<with>]
+     * : The services that should be included in the installation.
+     *
+     * [--devcontainer]
+     * : Create a .devcontainer configuration directory. Currently unsupported.
+     *
+     * ## EXAMPLES
+     *
+     *     wp sail:install --with=mysql,redis
+     *
+     * @when before_wp_load
      */
     public function __invoke( $args, $assoc_args )
     {
