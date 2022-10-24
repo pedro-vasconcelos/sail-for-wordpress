@@ -25,6 +25,29 @@ class InstallCommand
      *
      * @when before_wp_load
      */
+
+    /**
+     * The available services that may be installed.
+     *
+     * @var array<string>
+     */
+    protected $services = [
+        'mysql',
+        'pgsql',
+        'mariadb',
+        'redis',
+        'memcached',
+        'meilisearch',
+        'minio',
+        'mailhog',
+        'selenium',
+    ];
+
+    /**
+     * Execute the console command.
+     *
+     * @return int|null
+     */
     public function __invoke( $args, $assoc_args )
     {
 
@@ -36,6 +59,12 @@ class InstallCommand
             $services = ['mysql', 'mailhog'];
         }
 
+        if ($invalidServices = array_diff($services, $this->services)) {
+            \WP_CLI::error('Invalid services ['.implode(',', $invalidServices).'].');
+
+            return 1;
+        }
+
         $this->buildDockerCompose($services);
         $this->replaceEnvVariables($services);
         // $this->configurePhpUnit();
@@ -45,6 +74,8 @@ class InstallCommand
         // }
 
         \WP_CLI::success('Sail scaffolding installed successfully.');
+
+        $this->prepareInstallation($services);
     }
 
     /**
@@ -54,16 +85,7 @@ class InstallCommand
      */
     /* protected function gatherServicesWithSymfonyMenu()
     {
-        return $this->choice('Which services would you like to install?', [
-             'mysql',
-             'mariadb',
-             'redis',
-             'memcached',
-             'meilisearch',
-             'minio',
-             'mailhog',
-             'selenium',
-         ], 0, null, true);
+        return $this->choice('Which services would you like to install?', $this->services, 0, null, true);
     }
     */
 
@@ -191,5 +213,40 @@ class InstallCommand
         $environment .= "\nWWWUSER=1000\n";
 
         file_put_contents($this->laravel->basePath('.env'), $environment);
-    }*/
+    }
+    */
+
+    /**
+     * Prepare the installation by pulling and building any necessary images.
+     *
+     * @param  array  $services
+     * @return void
+     */
+    protected function prepareInstallation($services)
+    {
+        // Ensure docker is installed...
+        if ($this->runCommands(['docker info > /dev/null 2>&1']) !== 0) {
+            return;
+        }
+
+        $status = $this->runCommands([
+            './vendor/bin/sail pull '.implode(' ', $services),
+            './vendor/bin/sail build',
+        ]);
+
+        if ($status === 0) {
+            \WP_CLI::log('Sail images installed successfully.');
+        }
+    }
+
+    /**
+     * Run the given commands.
+     *
+     * @param  array  $commands
+     * @return int
+     */
+    protected function runCommands($commands)
+    {
+        return \WP_CLI::launch(implode(' && ', $commands));
+    }
 }
