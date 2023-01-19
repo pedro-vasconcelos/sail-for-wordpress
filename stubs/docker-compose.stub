@@ -3,7 +3,7 @@ version: '3'
 services:
     wordpress.test:
         build:
-            context: ./vendor/sterner-stuff/wordpress-sail/runtimes/8.1
+            context: ./vendor/pedro-vasconcelos/sail-for-wordpress/runtimes/8.1
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
