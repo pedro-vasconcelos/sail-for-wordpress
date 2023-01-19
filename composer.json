@@ -1,5 +1,6 @@
 {
-    "name": "sterner-stuff/wordpress-sail",
+    "name": "pedro-vasconcelos/sail-for-wordpress",
+    "type": "library",
     "description": "Docker files for running a basic WordPress application. Derived from Laravel Sail",
     "keywords": [
         "wordpress",
