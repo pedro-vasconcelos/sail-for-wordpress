@@ -8,13 +8,13 @@
     ],
     "license": "MIT",
     "support": {
-        "issues": "https://github.com/sterner-stuff/wordpress-sail/issues",
-        "source": "https://github.com/sterner-stuff/wordpress-sail"
+        "issues": "https://github.com/pedro-vasconcelos/sail-for-wordpress/issues",
+        "source": "https://github.com/pedro-vasconcelos/sail-for-wordpress"
     },
     "authors": [
         {
-            "name": "Ethan Clevenger",
-            "email": "ethan@sternerstuff.dev"
+            "name": "Pedro Vasconcelos",
+            "email": "me@pedrovasconcelos.com"
         },
         {
             "name": "Taylor Otwell",
